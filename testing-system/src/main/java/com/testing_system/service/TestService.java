@@ -32,4 +32,17 @@ public class TestService {
     public void deleteTest(Long id) {
         repository.deleteById(id);
     }
+
+    public TestEntity updateTest(
+            Long id,
+            TestEntity updatedTest) {
+
+        TestEntity test = getTestById(id);
+
+        test.setTitle(updatedTest.getTitle());
+        test.setSubject(updatedTest.getSubject());
+        test.setDescription(updatedTest.getDescription());
+
+        return repository.save(test);
+    }
 }

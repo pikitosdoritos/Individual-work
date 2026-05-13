@@ -44,4 +44,12 @@ public class TestController {
 
         return "Test deleted successfully";
     }
+
+    @PutMapping("/{id}")
+    public TestEntity updateTest(
+            @PathVariable Long id,
+            @RequestBody TestEntity test) {
+
+        return service.updateTest(id, test);
+    }
 }
