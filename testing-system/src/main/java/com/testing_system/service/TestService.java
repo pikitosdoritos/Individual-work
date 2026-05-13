@@ -1,5 +1,6 @@
 package com.testing_system.service;
 
+import com.testing_system.exception.ResourceNotFoundException;
 import com.testing_system.model.TestEntity;
 import com.testing_system.repository.TestRepository;
 import org.springframework.stereotype.Service;
@@ -22,7 +23,8 @@ public class TestService {
     public TestEntity getTestById(Long id) {
 
         return repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Test not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Test not found"));
     }
 
     public TestEntity saveTest(TestEntity test) {

@@ -1,5 +1,6 @@
 package com.testing_system.service;
 
+import com.testing_system.exception.ResourceNotFoundException;
 import com.testing_system.model.Student;
 import com.testing_system.repository.StudentRepository;
 import org.springframework.stereotype.Service;
@@ -22,7 +23,7 @@ public class StudentService {
     public Student getStudentById(Long id) {
 
         return repository.findById(id)
-                .orElseThrow(() -> new RuntimeException(
+                .orElseThrow(() -> new ResourceNotFoundException(
                         "Student not found"));
     }
 
