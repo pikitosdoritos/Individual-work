@@ -1,49 +1,43 @@
 package com.testing_system.controller;
 
-import com.testing_system.model.Question;
+import com.testing_system.dto.QuestionRequest;
+import com.testing_system.dto.QuestionResponse;
 import com.testing_system.service.QuestionService;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/questions")
+@RequestMapping("/api/questions")
 public class QuestionController {
 
-    private final QuestionService service;
+    private final QuestionService questionService;
 
-    public QuestionController(
-            QuestionService service) {
-
-        this.service = service;
+    public QuestionController(QuestionService questionService) {
+        this.questionService = questionService;
     }
 
-    @GetMapping
-    public List<Question> getAllQuestions() {
-
-        return service.getAllQuestions();
-    }
-
-    @GetMapping("/{id}")
-    public Question getQuestionById(
-            @PathVariable Long id) {
-
-        return service.getQuestionById(id);
+    @GetMapping("/test/{testId}")
+    public List<QuestionResponse> getQuestionsByTestId(@PathVariable Long testId) {
+        return questionService.getQuestionsByTestId(testId);
     }
 
     @PostMapping
-    public Question createQuestion(
-            @RequestBody Question question) {
+    @ResponseStatus(HttpStatus.CREATED)
+    public QuestionResponse createQuestion(@Valid @RequestBody QuestionRequest request) {
+        return questionService.createQuestion(request);
+    }
 
-        return service.saveQuestion(question);
+    @PutMapping("/{id}")
+    public QuestionResponse updateQuestion(@PathVariable Long id, @Valid @RequestBody QuestionRequest request) {
+        return questionService.updateQuestion(id, request);
     }
 
     @DeleteMapping("/{id}")
-    public String deleteQuestion(
-            @PathVariable Long id) {
-
-        service.deleteQuestion(id);
-
-        return "Question deleted successfully";
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteQuestion(@PathVariable Long id) {
+        questionService.deleteQuestion(id);
     }
 }

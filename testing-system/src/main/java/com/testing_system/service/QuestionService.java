@@ -1,8 +1,12 @@
 package com.testing_system.service;
 
+import com.testing_system.dto.QuestionRequest;
+import com.testing_system.dto.QuestionResponse;
 import com.testing_system.exception.ResourceNotFoundException;
 import com.testing_system.model.Question;
+import com.testing_system.model.Test;
 import com.testing_system.repository.QuestionRepository;
+import com.testing_system.repository.TestRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -10,28 +14,55 @@ import java.util.List;
 @Service
 public class QuestionService {
 
-    private final QuestionRepository repository;
+    private final QuestionRepository questionRepository;
+    private final TestRepository testRepository;
 
-    public QuestionService(QuestionRepository repository) {
-        this.repository = repository;
+    public QuestionService(QuestionRepository questionRepository, TestRepository testRepository) {
+        this.questionRepository = questionRepository;
+        this.testRepository = testRepository;
     }
 
-    public List<Question> getAllQuestions() {
-        return repository.findAll();
+    public List<QuestionResponse> getQuestionsByTestId(Long testId) {
+        return questionRepository.findByTestId(testId).stream()
+                .map(this::toResponse)
+                .toList();
     }
 
-    public Question getQuestionById(Long id) {
-
-        return repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Question not found"));
+    public QuestionResponse createQuestion(QuestionRequest request) {
+        Test test = testRepository.findById(request.getTestId())
+                .orElseThrow(() -> new ResourceNotFoundException("Test not found with id: " + request.getTestId()));
+        Question question = new Question();
+        question.setText(request.getText());
+        question.setType(request.getType());
+        question.setOptions(request.getOptions());
+        question.setCorrectAnswers(request.getCorrectAnswers());
+        question.setTest(test);
+        return toResponse(questionRepository.save(question));
     }
 
-    public Question saveQuestion(Question question) {
-        return repository.save(question);
+    public QuestionResponse updateQuestion(Long id, QuestionRequest request) {
+        Question question = questionRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Question not found with id: " + id));
+        question.setText(request.getText());
+        question.setType(request.getType());
+        question.setOptions(request.getOptions());
+        question.setCorrectAnswers(request.getCorrectAnswers());
+        return toResponse(questionRepository.save(question));
     }
 
     public void deleteQuestion(Long id) {
-        repository.deleteById(id);
+        if (!questionRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Question not found with id: " + id);
+        }
+        questionRepository.deleteById(id);
+    }
+
+    private QuestionResponse toResponse(Question question) {
+        QuestionResponse response = new QuestionResponse();
+        response.setId(question.getId());
+        response.setText(question.getText());
+        response.setType(question.getType());
+        response.setOptions(question.getOptions());
+        return response;
     }
 }

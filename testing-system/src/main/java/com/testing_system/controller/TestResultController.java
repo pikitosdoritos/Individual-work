@@ -1,48 +1,35 @@
 package com.testing_system.controller;
 
-import com.testing_system.model.TestResult;
+import com.testing_system.dto.SubmitRequest;
+import com.testing_system.dto.TestResultResponse;
+import com.testing_system.service.ResultService;
 import com.testing_system.service.TestResultService;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/results")
+@RequestMapping("/api/results")
 public class TestResultController {
 
-    private final TestResultService service;
+    private final TestResultService testResultService;
+    private final ResultService resultService;
 
-    public TestResultController(
-            TestResultService service) {
-
-        this.service = service;
+    public TestResultController(TestResultService testResultService, ResultService resultService) {
+        this.testResultService = testResultService;
+        this.resultService = resultService;
     }
 
-    @GetMapping
-    public List<TestResult> getAllResults() {
-        return service.getAllResults();
+    @PostMapping("/submit")
+    @ResponseStatus(HttpStatus.CREATED)
+    public TestResultResponse submitTest(@Valid @RequestBody SubmitRequest request) {
+        return testResultService.submitTest(request);
     }
 
-    @GetMapping("/{id}")
-    public TestResult getResultById(
-            @PathVariable Long id) {
-
-        return service.getResultById(id);
-    }
-
-    @PostMapping
-    public TestResult createResult(
-            @RequestBody TestResult result) {
-
-        return service.saveResult(result);
-    }
-
-    @DeleteMapping("/{id}")
-    public String deleteResult(
-            @PathVariable Long id) {
-
-        service.deleteResult(id);
-
-        return "Result deleted successfully";
+    @GetMapping("/test/{testId}")
+    public List<TestResultResponse> getResultsByTestId(@PathVariable Long testId) {
+        return resultService.getResultsByTestId(testId);
     }
 }

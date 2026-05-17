@@ -1,10 +1,7 @@
 package com.testing_system.model;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-
 import jakarta.validation.constraints.NotBlank;
 
 import java.util.ArrayList;
@@ -18,84 +15,44 @@ public class Question {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "Question text cannot be empty")
+    @NotBlank
     private String text;
 
-    private int points;
+    @Enumerated(EnumType.STRING)
+    private QuestionType type;
 
-    @ManyToOne
+    @ElementCollection
+    @CollectionTable(name = "question_options", joinColumns = @JoinColumn(name = "question_id"))
+    @OrderColumn(name = "option_order")
+    @Column(name = "option_text")
+    private List<String> options = new ArrayList<>();
+
+    @ElementCollection
+    @CollectionTable(name = "question_correct_answers", joinColumns = @JoinColumn(name = "question_id"))
+    @OrderColumn(name = "answer_order")
+    @Column(name = "answer_index")
+    private List<Integer> correctAnswers = new ArrayList<>();
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "test_id")
-    @JsonBackReference
-    private TestEntity test;
+    @JsonIgnore
+    private Test test;
 
-    @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
-    private List<AnswerOption> answerOptions = new ArrayList<>();
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public Question() {
-    }
+    public String getText() { return text; }
+    public void setText(String text) { this.text = text; }
 
-    public Question(
-            String text,
-            int points) {
-        this.text = text;
-        this.points = points;
-    }
+    public QuestionType getType() { return type; }
+    public void setType(QuestionType type) { this.type = type; }
 
-    public void addAnswerOption(
-            AnswerOption option) {
+    public List<String> getOptions() { return options; }
+    public void setOptions(List<String> options) { this.options = options; }
 
-        answerOptions.add(option);
+    public List<Integer> getCorrectAnswers() { return correctAnswers; }
+    public void setCorrectAnswers(List<Integer> correctAnswers) { this.correctAnswers = correctAnswers; }
 
-        option.setQuestion(this);
-    }
-
-    public void removeAnswerOption(
-            AnswerOption option) {
-
-        answerOptions.remove(option);
-
-        option.setQuestion(null);
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getText() {
-        return text;
-    }
-
-    public int getPoints() {
-        return points;
-    }
-
-    public TestEntity getTest() {
-        return test;
-    }
-
-    public List<AnswerOption> getAnswerOptions() {
-        return answerOptions;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public void setText(String text) {
-        this.text = text;
-    }
-
-    public void setPoints(int points) {
-        this.points = points;
-    }
-
-    public void setTest(TestEntity test) {
-        this.test = test;
-    }
-
-    public void setAnswerOptions(
-            List<AnswerOption> answerOptions) {
-        this.answerOptions = answerOptions;
-    }
+    public Test getTest() { return test; }
+    public void setTest(Test test) { this.test = test; }
 }

@@ -1,6 +1,7 @@
 package com.testing_system.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 
 import java.time.LocalDateTime;
 
@@ -12,58 +13,37 @@ public class TestResult {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private int score;
+    @NotBlank
+    private String studentName;
 
-    private LocalDateTime completedAt;
+    private Long testId;
 
-    @ManyToOne
-    @JoinColumn(name = "student_id")
-    private Student student;
+    private Integer score;
 
-    @ManyToOne
-    @JoinColumn(name = "test_id")
-    private TestEntity test;
+    private Integer totalQuestions;
 
-    public TestResult() {
+    private LocalDateTime submittedAt;
+
+    @PrePersist
+    protected void onSubmit() {
+        submittedAt = LocalDateTime.now();
     }
 
-    public Long getId() {
-        return id;
-    }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public int getScore() {
-        return score;
-    }
+    public String getStudentName() { return studentName; }
+    public void setStudentName(String studentName) { this.studentName = studentName; }
 
-    public LocalDateTime getCompletedAt() {
-        return completedAt;
-    }
+    public Long getTestId() { return testId; }
+    public void setTestId(Long testId) { this.testId = testId; }
 
-    public Student getStudent() {
-        return student;
-    }
+    public Integer getScore() { return score; }
+    public void setScore(Integer score) { this.score = score; }
 
-    public TestEntity getTest() {
-        return test;
-    }
+    public Integer getTotalQuestions() { return totalQuestions; }
+    public void setTotalQuestions(Integer totalQuestions) { this.totalQuestions = totalQuestions; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public void setScore(int score) {
-        this.score = score;
-    }
-
-    public void setCompletedAt(LocalDateTime completedAt) {
-        this.completedAt = completedAt;
-    }
-
-    public void setStudent(Student student) {
-        this.student = student;
-    }
-
-    public void setTest(TestEntity test) {
-        this.test = test;
-    }
+    public LocalDateTime getSubmittedAt() { return submittedAt; }
+    public void setSubmittedAt(LocalDateTime submittedAt) { this.submittedAt = submittedAt; }
 }
