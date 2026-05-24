@@ -8,6 +8,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -24,7 +28,7 @@ public class AuthController {
         Optional<User> optionalUser = userRepository.findByUsername(request.getUsername());
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
-            if (user.getPassword().equals(request.getPassword())) {
+            if (user.getPassword().equals(hashPassword(request.getPassword()))) {
                 return ResponseEntity.ok(new AuthResponse(user.getId(), user.getUsername(), user.getRole()));
             }
         }
@@ -38,10 +42,20 @@ public class AuthController {
         }
         User user = new User();
         user.setUsername(request.getUsername());
-        user.setPassword(request.getPassword()); // In a real app, hash the password!
+        user.setPassword(hashPassword(request.getPassword()));
         user.setRole(request.getRole());
         
         User savedUser = userRepository.save(user);
         return ResponseEntity.ok(new AuthResponse(savedUser.getId(), savedUser.getUsername(), savedUser.getRole()));
+    }
+
+    private String hashPassword(String password) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            byte[] hash = md.digest(password.getBytes(StandardCharsets.UTF_8));
+            return Base64.getEncoder().encodeToString(hash);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("Error hashing password", e);
+        }
     }
 }

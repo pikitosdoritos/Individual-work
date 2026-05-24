@@ -29,6 +29,7 @@ public class QuestionService {
     }
 
     public QuestionResponse createQuestion(QuestionRequest request) {
+        validateQuestionRequest(request);
         Test test = testRepository.findById(request.getTestId())
                 .orElseThrow(() -> new ResourceNotFoundException("Test not found with id: " + request.getTestId()));
         Question question = new Question();
@@ -41,6 +42,7 @@ public class QuestionService {
     }
 
     public QuestionResponse updateQuestion(Long id, QuestionRequest request) {
+        validateQuestionRequest(request);
         Question question = questionRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Question not found with id: " + id));
         question.setText(request.getText());
@@ -64,5 +66,19 @@ public class QuestionService {
         response.setType(question.getType());
         response.setOptions(question.getOptions());
         return response;
+    }
+
+    private void validateQuestionRequest(QuestionRequest request) {
+        if (request.getType() == com.testing_system.model.QuestionType.SINGLE && request.getCorrectAnswers().size() != 1) {
+            throw new IllegalArgumentException("Single choice question must have exactly one correct answer.");
+        }
+        for (Integer index : request.getCorrectAnswers()) {
+            if (index < 0 || index >= request.getOptions().size()) {
+                throw new IllegalArgumentException("Correct answer index out of bounds: " + index);
+            }
+        }
+        if (request.getCorrectAnswers().stream().distinct().count() != request.getCorrectAnswers().size()) {
+            throw new IllegalArgumentException("Correct answers contain duplicates.");
+        }
     }
 }
